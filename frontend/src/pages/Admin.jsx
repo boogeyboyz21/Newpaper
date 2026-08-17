@@ -11,8 +11,9 @@ import BillingTab from "./admin/BillingTab";
 import SettingsTab from "./admin/SettingsTab";
 import PagesTab from "./admin/PagesTab";
 import AdsTab from "./admin/AdsTab";
+import MenuTab from "./admin/MenuTab";
 import {
-  LayoutDashboard, FileText, MessageSquare, Users, ScrollText, Bell, Receipt, Settings as SettingsIcon, FileEdit, Megaphone,
+  LayoutDashboard, FileText, MessageSquare, Users, ScrollText, Bell, Receipt, Settings as SettingsIcon, FileEdit, Megaphone, ListTree,
 } from "lucide-react";
 
 const TABS = [
@@ -21,6 +22,7 @@ const TABS = [
   { key: "comments", label: "Comments", icon: MessageSquare, roles: ["editor", "administrator"], C: CommentsTab },
   { key: "ads", label: "Advertising", icon: Megaphone, roles: ["administrator"], C: AdsTab },
   { key: "pages", label: "Pages", icon: FileEdit, roles: ["administrator"], C: PagesTab },
+  { key: "menu", label: "Menu & Social", icon: ListTree, roles: ["administrator"], C: MenuTab },
   { key: "billing", label: "Billing & GST", icon: Receipt, roles: ["administrator"], C: BillingTab },
   { key: "push", label: "Push", icon: Bell, roles: ["administrator"], C: PushTab },
   { key: "staff", label: "Staff", icon: Users, roles: ["administrator"], C: StaffTab },

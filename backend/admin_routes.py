@@ -21,6 +21,8 @@ class SettingsInput(BaseModel):
     ga_id: Optional[str] = None
     analytics_mode: Optional[str] = None
     adsense_client: Optional[str] = None
+    social_links: Optional[list] = None
+    menu: Optional[list] = None
 
 
 @router.get("/settings")
@@ -34,6 +36,8 @@ async def get_admin_settings(user=Depends(require_role("administrator"))):
         "ga_id": s.get("ga_id", ""),
         "analytics_mode": s.get("analytics_mode", "privacy"),
         "adsense_client": s.get("adsense_client", ""),
+        "social_links": s.get("social_links", []),
+        "menu": s.get("menu", []),
     }
 
 

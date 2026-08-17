@@ -39,6 +39,8 @@ async def get_settings():
         "analytics_mode": mode,
         "ga_id": ga if mode == "ga4" else "",
         "adsense_client": s.get("adsense_client", ""),
+        "social_links": s.get("social_links", []),
+        "menu": s.get("menu", []),
     }
 
 
@@ -332,6 +334,12 @@ async def publish_article(article_id: str, request: Request,
     await db.articles.update_one({"_id": ObjectId(article_id)},
                                  {"$set": {"status": "published", "published_at": now_iso(), "updated_at": now_iso()}})
     await log_action(user, "Published Live", article_id, request)
+    try:
+        doc = await db.articles.find_one({"_id": ObjectId(article_id)})
+        from push_routes import push_all
+        await push_all("New story published", doc.get("title", ""), f"/news/{article_id}")
+    except Exception:
+        pass
     return {"ok": True}
 
 

@@ -3,8 +3,11 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { AuthProvider } from "@/context/AuthContext";
+import { BookmarkProvider } from "@/context/BookmarkContext";
 import { ProtectedRoute, StaffRoute } from "@/components/Guards";
 import Analytics from "@/components/Analytics";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 import Home from "@/pages/Home";
 import Category from "@/pages/Category";
 import Article from "@/pages/Article";
@@ -26,6 +29,7 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <BookmarkProvider>
         <BrowserRouter>
           <Toaster position="top-center" richColors />
           <Analytics />
@@ -40,6 +44,8 @@ function App() {
             <Route path="/author/:id" element={<Author />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/plans" element={<Plans />} />
             <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
             <Route path="/admin" element={<StaffRoute roles={STAFF}><Admin /></StaffRoute>} />
@@ -47,6 +53,7 @@ function App() {
             <Route path="*" element={<Home />} />
           </Routes>
         </BrowserRouter>
+        </BookmarkProvider>
       </AuthProvider>
     </ThemeProvider>
   );

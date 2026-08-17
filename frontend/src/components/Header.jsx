@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Moon, Sun, Search, User, Menu, X, LogOut, LayoutDashboard, Newspaper, Home as HomeIcon, Lock } from "lucide-react";
+import { Moon, Sun, Search, User, Menu, X, LogOut, LayoutDashboard, Newspaper, Lock, ChevronDown, Home as HomeIcon } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
+import { api } from "../lib/api";
 
 const CATEGORIES = [
   { slug: "global", label: "Global" },
@@ -20,6 +21,11 @@ const TOP_LINKS = [
   { label: "Contact Us", to: "/contact" },
 ];
 
+const DEFAULT_MENU = [
+  { label: "Home", path: "/", children: [] },
+  ...CATEGORIES.map((c) => ({ label: c.label, path: `/category/${c.slug}`, children: [] })),
+];
+
 export default function Header() {
   const { dark, toggle } = useTheme();
   const { user, logout } = useAuth();
@@ -27,12 +33,23 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [customMenu, setCustomMenu] = useState([]);
+  const [openIdx, setOpenIdx] = useState(null);       // desktop dropdown
+  const [mobileIdx, setMobileIdx] = useState(null);   // mobile expanded item
+  const navRef = useRef(null);
   const nav = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 130);
     window.addEventListener("scroll", onScroll);
+    api.get("/settings").then(({ data }) => setCustomMenu(data.menu || [])).catch(() => {});
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const onClick = (e) => { if (navRef.current && !navRef.current.contains(e.target)) setOpenIdx(null); };
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
   }, []);
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -44,7 +61,12 @@ export default function Header() {
     if (q.trim()) nav(`/search?q=${encodeURIComponent(q.trim())}`);
   };
 
-  const menuItems = [{ slug: "", label: "Home", icon: HomeIcon }, ...CATEGORIES];
+  const menuItems = (customMenu && customMenu.length ? customMenu : DEFAULT_MENU)
+    .filter((m) => m && m.label);
+
+  const isHome = (m) => m.path === "/" || (m.label || "").trim().toLowerCase() === "home";
+
+  const closeMobile = () => { setMenuOpen(false); setMobileIdx(null); };
 
   return (
     <header className="sticky top-0 z-50" style={{ backgroundColor: "var(--paper)" }}>
@@ -80,21 +102,45 @@ export default function Header() {
 
       {/* floating pill nav */}
       <div className={`max-w-7xl mx-auto px-4 ${scrolled ? "py-2" : "pb-3"}`}>
-        <nav className="nav-pill px-3 sm:px-4 py-2 flex items-center justify-between gap-3" data-testid="sticky-nav">
+        <nav ref={navRef} className="nav-pill px-3 sm:px-4 py-2 flex items-center justify-between gap-3" data-testid="sticky-nav">
           <button className="md:hidden" onClick={() => setMenuOpen((m) => !m)} data-testid="mobile-menu-toggle">
             {menuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
           <ul className="hidden md:flex items-center">
-            {menuItems.map((c, i) => (
-              <li key={c.slug || "home"} className="flex items-center">
-                {i > 0 && <span className="nav-divider px-1">|</span>}
-                <Link to={c.slug ? `/category/${c.slug}` : "/"} data-testid={c.slug ? `nav-cat-${c.slug}` : "nav-home"}
-                  className="flex items-center gap-1 px-2 py-1 text-[15px] font-semibold uppercase tracking-wide hover:text-green"
-                  style={{ transitionProperty: "color" }}>
-                  {c.icon && <c.icon size={16} />} {c.label}
-                </Link>
-              </li>
-            ))}
+            {menuItems.map((c, i) => {
+              const kids = (c.children || []).filter((k) => k && k.label);
+              const testSlug = (c.path || c.label).replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").toLowerCase();
+              return (
+                <li key={i} className="flex items-center relative">
+                  {i > 0 && <span className="nav-divider px-1">|</span>}
+                  {kids.length ? (
+                    <>
+                      <button data-testid={`nav-menu-${testSlug}`} onClick={() => setOpenIdx(openIdx === i ? null : i)}
+                        className="flex items-center gap-1 px-2 py-1 text-[15px] font-semibold uppercase tracking-wide hover:text-green"
+                        style={{ transitionProperty: "color" }}>
+                        {c.label} <ChevronDown size={14} className={`transition-transform ${openIdx === i ? "rotate-180" : ""}`} style={{ transitionProperty: "transform" }} />
+                      </button>
+                      {openIdx === i && (
+                        <ul className="absolute top-full left-0 mt-2 min-w-[180px] card shadow-lg py-1.5 z-50" data-testid={`nav-dropdown-${testSlug}`}>
+                          {c.path && (
+                            <li><Link to={c.path} onClick={() => setOpenIdx(null)} className="block px-4 py-2 text-sm font-semibold hover:text-green hover:bg-[var(--surface-2)]">{c.label}</Link></li>
+                          )}
+                          {kids.map((k, j) => (
+                            <li key={j}><Link to={k.path || "#"} onClick={() => setOpenIdx(null)} className="block px-4 py-2 text-sm hover:text-green hover:bg-[var(--surface-2)]">{k.label}</Link></li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <Link to={c.path || "/"} data-testid={`nav-menu-${testSlug}`}
+                      className="flex items-center gap-1 px-2 py-1 text-[15px] font-semibold uppercase tracking-wide hover:text-green"
+                      style={{ transitionProperty: "color" }}>
+                      {isHome(c) && <HomeIcon size={16} />} {c.label}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
 
           <div className="flex items-center gap-2">
@@ -129,11 +175,32 @@ export default function Header() {
         </nav>
 
         {menuOpen && (
-          <ul className="md:hidden nav-pill mt-2 px-4 py-2 space-y-1">
-            <li><Link to="/" onClick={() => setMenuOpen(false)} className="block py-2 font-semibold uppercase text-sm">Home</Link></li>
-            {CATEGORIES.map((c) => (
-              <li key={c.slug}><Link to={`/category/${c.slug}`} onClick={() => setMenuOpen(false)} className="block py-2 font-semibold uppercase text-sm">{c.label}</Link></li>
-            ))}
+          <ul className="md:hidden nav-pill mt-2 px-4 py-2 space-y-1" data-testid="mobile-menu">
+            {menuItems.map((c, i) => {
+              const kids = (c.children || []).filter((k) => k && k.label);
+              return (
+                <li key={i}>
+                  {kids.length ? (
+                    <>
+                      <button onClick={() => setMobileIdx(mobileIdx === i ? null : i)} data-testid={`mobile-menu-item-${i}`}
+                        className="w-full flex items-center justify-between py-2 font-semibold uppercase text-sm">
+                        {c.label} <ChevronDown size={15} className={mobileIdx === i ? "rotate-180" : ""} style={{ transitionProperty: "transform" }} />
+                      </button>
+                      {mobileIdx === i && (
+                        <ul className="pl-3 pb-1 space-y-1">
+                          {c.path && <li><Link to={c.path} onClick={closeMobile} className="block py-1.5 text-sm">{c.label}</Link></li>}
+                          {kids.map((k, j) => (
+                            <li key={j}><Link to={k.path || "#"} onClick={closeMobile} className="block py-1.5 text-sm text-ink-soft">↳ {k.label}</Link></li>
+                          ))}
+                        </ul>
+                      )}
+                    </>
+                  ) : (
+                    <Link to={c.path || "/"} onClick={closeMobile} className="flex items-center gap-2 py-2 font-semibold uppercase text-sm" data-testid={`mobile-menu-item-${i}`}>{isHome(c) && <HomeIcon size={15} />} {c.label}</Link>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

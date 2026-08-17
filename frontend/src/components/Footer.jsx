@@ -1,12 +1,28 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../lib/api";
 import { toast } from "sonner";
-import { Newspaper, Mail } from "lucide-react";
+import { Newspaper, Mail, Twitter, Facebook, Instagram, Youtube, Linkedin, Send, Globe } from "lucide-react";
+
+const socialIcon = (label = "") => {
+  const l = label.toLowerCase();
+  if (l.includes("twitter") || l === "x") return Twitter;
+  if (l.includes("facebook")) return Facebook;
+  if (l.includes("instagram")) return Instagram;
+  if (l.includes("youtube")) return Youtube;
+  if (l.includes("linkedin")) return Linkedin;
+  if (l.includes("telegram")) return Send;
+  return Globe;
+};
 
 export default function Footer() {
   const [email, setEmail] = useState("");
+  const [social, setSocial] = useState([]);
   const year = new Date().getFullYear();
+
+  useEffect(() => {
+    api.get("/settings").then(({ data }) => setSocial((data.social_links || []).filter((s) => s && s.url))).catch(() => {});
+  }, []);
 
   const subscribe = async (e) => {
     e.preventDefault();
@@ -59,7 +75,21 @@ export default function Footer() {
               <li key={l}><Link to={to} className="hover:text-green">{l}</Link></li>
             ))}
           </ul>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
+            {social.length > 0 && (
+              <div className="flex items-center gap-2" data-testid="footer-social">
+                {social.map((s, i) => {
+                  const Icon = socialIcon(s.label);
+                  return (
+                    <a key={i} href={s.url} target="_blank" rel="noopener noreferrer" title={s.label}
+                      data-testid={`footer-social-${i}`}
+                      className="w-8 h-8 rounded-full card-2 flex items-center justify-center hover:text-green">
+                      <Icon size={15} />
+                    </a>
+                  );
+                })}
+              </div>
+            )}
             <span className="card-2 pill px-3 py-1.5 text-[11px]">▶ Google Play</span>
             <span className="card-2 pill px-3 py-1.5 text-[11px]"> App Store</span>
           </div>

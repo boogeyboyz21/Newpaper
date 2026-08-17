@@ -17,6 +17,28 @@ async def vapid_public():
     return {"public_key": os.environ.get("VAPID_PUBLIC_KEY", "")}
 
 
+async def push_all(title, body, url="/"):
+    """Broadcast a web push to every stored subscription (best-effort)."""
+    from pywebpush import webpush
+    subs = await db.push_subscriptions.find({}).to_list(5000)
+    payload = json.dumps({"title": title[:60], "body": body[:120], "url": url})
+    claims = {"sub": os.environ.get("VAPID_SUBJECT", "mailto:admin@example.com")}
+    pem = os.environ.get("VAPID_PRIVATE_PEM")
+    sent = 0
+    for s in subs:
+        try:
+            webpush(subscription_info={"endpoint": s["endpoint"], "keys": s["keys"]},
+                    data=payload, vapid_private_key=pem, vapid_claims=dict(claims))
+            sent += 1
+        except Exception as e:
+            logger.warning(f"push failed: {e}")
+    if subs:
+        await db.push_broadcasts.insert_one({"title": title, "body": body, "url": url,
+                                             "sent": sent, "failed": len(subs) - sent, "total": len(subs),
+                                             "by": "system", "created_at": datetime.now(timezone.utc).isoformat()})
+    return sent
+
+
 class SubInput(BaseModel):
     endpoint: str
     keys: dict

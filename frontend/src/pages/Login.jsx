@@ -48,6 +48,9 @@ export default function Login() {
           <p className="text-sm text-center mt-4 text-ink-soft">
             No account? <Link to="/register" className="text-crimson font-semibold" data-testid="link-register">Register</Link>
           </p>
+          <p className="text-sm text-center mt-2 text-ink-soft">
+            <Link to="/forgot-password" className="text-green font-semibold" data-testid="link-forgot">Forgot password?</Link>
+          </p>
         </div>
       </div>
     </Layout>

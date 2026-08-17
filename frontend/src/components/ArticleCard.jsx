@@ -1,6 +1,20 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Clock, MessageSquare, Eye, ArrowUpRight } from "lucide-react";
+import { Clock, MessageSquare, Eye, ArrowUpRight, Bookmark } from "lucide-react";
+import { useBookmarks } from "../context/BookmarkContext";
+
+function BookmarkBtn({ id, corner }) {
+  const bm = useBookmarks();
+  const saved = bm?.has(id);
+  return (
+    <button data-testid="card-bookmark-btn"
+      onClick={(e) => { e.preventDefault(); e.stopPropagation(); bm?.toggle(id); }}
+      title={saved ? "Saved" : "Save for later"}
+      className={`${corner ? "absolute top-2 right-2 z-10" : ""} w-8 h-8 rounded-full flex items-center justify-center border ${saved ? "bg-green text-white border-green" : "surface border-[var(--line)] text-ink-soft"} hover:border-green`}>
+      <Bookmark size={14} fill={saved ? "currentColor" : "none"} />
+    </button>
+  );
+}
 
 export function timeAgo(iso) {
   if (!iso) return "";
@@ -13,7 +27,8 @@ export function timeAgo(iso) {
 export default function ArticleCard({ article, variant = "row" }) {
   if (variant === "thumb") {
     return (
-      <Link to={`/news/${article.id}`} data-testid="article-card-thumb" className="group block card overflow-hidden img-zoom">
+      <Link to={`/news/${article.id}`} data-testid="article-card-thumb" className="group block card overflow-hidden img-zoom relative">
+        <BookmarkBtn id={article.id} corner />
         <div className="aspect-[16/10] overflow-hidden">
           <img src={article.image_url} alt={article.title} className="w-full h-full object-cover" />
         </div>
@@ -36,7 +51,10 @@ export default function ArticleCard({ article, variant = "row" }) {
         </div>
       </Link>
       <div className="flex-1 min-w-0 flex flex-col">
-        <span className="tag text-[9px] self-start">{article.category}</span>
+        <div className="flex items-start justify-between gap-2">
+          <span className="tag text-[9px] self-start">{article.category}</span>
+          <BookmarkBtn id={article.id} />
+        </div>
         <Link to={`/news/${article.id}`}>
           <h3 className="font-serif-display font-bold text-lg sm:text-xl leading-snug mt-2 headline-link line-clamp-2">{article.title}</h3>
         </Link>

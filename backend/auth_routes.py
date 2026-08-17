@@ -1,3 +1,5 @@
+import os
+import secrets
 from fastapi import APIRouter, HTTPException, Request, Response, Depends
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone, timedelta
@@ -104,4 +106,41 @@ async def change_password(data: ChangePwInput, user: dict = Depends(get_current_
     if len(data.new_password) < 6:
         raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
     await db.users.update_one({"_id": u["_id"]}, {"$set": {"password_hash": hash_password(data.new_password)}})
+    return {"ok": True}
+
+
+class ForgotInput(BaseModel):
+    email: EmailStr
+
+
+@router.post("/forgot-password")
+async def forgot_password(data: ForgotInput):
+    u = await db.users.find_one({"email": data.email.lower()})
+    if u:
+        token = secrets.token_urlsafe(32)
+        expires = (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+        await db.reset_tokens.insert_one({"token": token, "user_id": str(u["_id"]), "expires": expires, "used": False})
+        link = f"{os.environ.get('FRONTEND_URL', '')}/reset-password?token={token}"
+        try:
+            from email_utils import send_reset_email
+            await send_reset_email(u["email"], u.get("name", "there"), link)
+        except Exception:
+            pass
+    return {"ok": True, "message": "If that email is registered, a password reset link has been sent."}
+
+
+class ResetInput(BaseModel):
+    token: str
+    new_password: str
+
+
+@router.post("/reset-password")
+async def reset_password(data: ResetInput):
+    rt = await db.reset_tokens.find_one({"token": data.token, "used": False})
+    if not rt or datetime.fromisoformat(rt["expires"]) < datetime.now(timezone.utc):
+        raise HTTPException(status_code=400, detail="This reset link is invalid or has expired")
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    await db.users.update_one({"_id": ObjectId(rt["user_id"])}, {"$set": {"password_hash": hash_password(data.new_password)}})
+    await db.reset_tokens.update_one({"_id": rt["_id"]}, {"$set": {"used": True}})
     return {"ok": True}

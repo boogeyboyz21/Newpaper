@@ -51,3 +51,15 @@ async def send_invoice_email(to: str, name: str, inv: dict):
         '</td></tr></table>'
     )
     return await send_email(to, f"Your Editorial Wire invoice {inv['invoice_no']}", html)
+
+
+async def send_reset_email(to: str, name: str, link: str):
+    html = (
+        '<table role="presentation" width="100%"><tr><td style="padding:24px;font-family:Arial,sans-serif;color:#1a1a1a">'
+        '<h2 style="font-family:Georgia,serif;color:#1b5e2a">The Editorial Wire</h2>'
+        f'<p>Hi {escape(name)}, we received a request to reset your password.</p>'
+        f'<p><a href="{link}" style="background:#2f8241;color:#ffffff;padding:10px 18px;border-radius:8px;text-decoration:none">Reset your password</a></p>'
+        '<p style="font-size:12px;color:#888">This link expires in 1 hour. If you did not request this, you can safely ignore this email. We never ask for your password by email.</p>'
+        '</td></tr></table>'
+    )
+    return await send_email(to, "Reset your Editorial Wire password", html)

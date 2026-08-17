@@ -108,12 +108,18 @@ export default function Sidebar() {
   const [trending, setTrending] = useState([]);
   const [mostRead, setMostRead] = useState([]);
   const [recommended, setRecommended] = useState([]);
+  const [socials, setSocials] = useState([]);
 
   useEffect(() => {
     api.get("/articles/trending").then(({ data }) => setTrending(data.slice(0, 5))).catch(() => {});
     api.get("/articles/most-read").then(({ data }) => setMostRead(data.slice(0, 5))).catch(() => {});
     api.get("/articles?limit=4").then(({ data }) => setRecommended(data.slice(0, 4))).catch(() => {});
+    api.get("/settings").then(({ data }) => setSocials(data.social_links || [])).catch(() => {});
   }, []);
+
+  const socialItems = (socials && socials.length)
+    ? socials.map((s) => ({ label: s.label, url: s.url }))
+    : SOCIALS.map((s) => ({ label: s.label, url: "#" }));
 
   return (
     <aside className="space-y-6 lg:sticky lg:top-40 self-start" data-testid="sidebar">
