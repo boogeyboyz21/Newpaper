@@ -6,11 +6,12 @@ import Sidebar from "../components/Sidebar";
 import BreakingTicker from "../components/BreakingTicker";
 import ArticleCard, { timeAgo } from "../components/ArticleCard";
 import { AdSlot } from "../components/Sidebar";
-import { Clock, Eye, ArrowUpRight } from "lucide-react";
+import { Clock, Eye, ArrowUpRight, Lock } from "lucide-react";
 
 export default function Home() {
   const [articles, setArticles] = useState([]);
   const [lead, setLead] = useState(null);
+  const [premium, setPremium] = useState([]);
 
   useEffect(() => {
     api.get("/articles?limit=40").then(({ data }) => {
@@ -18,6 +19,7 @@ export default function Home() {
       setLead(leadArticle);
       setArticles(data.filter((a) => a.id !== leadArticle?.id));
     }).catch(() => {});
+    api.get("/articles?premium=true&limit=6").then(({ data }) => setPremium(data)).catch(() => {});
   }, []);
 
   const thumbs = articles.slice(0, 4);
@@ -54,6 +56,19 @@ export default function Home() {
         <div className="lg:col-span-8"><BreakingTicker /></div>
         <div className="lg:col-span-4 ad-box h-full min-h-[52px] py-2"><span className="font-serif-display text-lg">Advertise Here</span></div>
       </div>
+
+      {/* Premium Picks */}
+      {premium.length > 0 && (
+        <section className="mt-8" data-testid="premium-picks">
+          <div className="flex items-center gap-3 mb-4">
+            <span className="tag text-[10px] flex items-center gap-1"><Lock size={11} /> Premium Picks</span>
+            <span className="h-px flex-1 bg-[var(--line)]" />
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {premium.slice(0, 4).map((a) => <ArticleCard key={a.id} article={a} variant="thumb" />)}
+          </div>
+        </section>
+      )}
 
       {/* Feed + Sidebar */}
       <div className="mt-6 grid grid-cols-1 lg:grid-cols-12 gap-8 pb-4">

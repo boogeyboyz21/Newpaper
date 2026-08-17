@@ -9,14 +9,18 @@ import AuditTab from "./admin/AuditTab";
 import PushTab from "./admin/PushTab";
 import BillingTab from "./admin/BillingTab";
 import SettingsTab from "./admin/SettingsTab";
+import PagesTab from "./admin/PagesTab";
+import AdsTab from "./admin/AdsTab";
 import {
-  LayoutDashboard, FileText, MessageSquare, Users, ScrollText, Bell, Receipt, Settings as SettingsIcon,
+  LayoutDashboard, FileText, MessageSquare, Users, ScrollText, Bell, Receipt, Settings as SettingsIcon, FileEdit, Megaphone,
 } from "lucide-react";
 
 const TABS = [
   { key: "overview", label: "Overview", icon: LayoutDashboard, roles: ["editor", "administrator"], C: Overview },
   { key: "articles", label: "Articles", icon: FileText, roles: ["reporter", "editor", "administrator"], C: ArticlesTab },
   { key: "comments", label: "Comments", icon: MessageSquare, roles: ["editor", "administrator"], C: CommentsTab },
+  { key: "ads", label: "Advertising", icon: Megaphone, roles: ["administrator"], C: AdsTab },
+  { key: "pages", label: "Pages", icon: FileEdit, roles: ["administrator"], C: PagesTab },
   { key: "billing", label: "Billing & GST", icon: Receipt, roles: ["administrator"], C: BillingTab },
   { key: "push", label: "Push", icon: Bell, roles: ["administrator"], C: PushTab },
   { key: "staff", label: "Staff", icon: Users, roles: ["administrator"], C: StaffTab },

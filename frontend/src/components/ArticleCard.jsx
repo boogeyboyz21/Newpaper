@@ -43,7 +43,9 @@ export default function ArticleCard({ article, variant = "row" }) {
         <p className="text-sm text-ink-soft mt-1 line-clamp-2 hidden sm:block">{article.excerpt}</p>
         <div className="flex items-center justify-between mt-auto pt-2">
           <div className="flex items-center gap-3 text-[11px] text-ink-soft">
-            <span className="font-semibold text-green">{article.author_name}</span>
+            {article.author_id
+              ? <Link to={`/author/${article.author_id}`} className="font-semibold text-green hover:underline" data-testid="byline-link">{article.author_name}</Link>
+              : <span className="font-semibold text-green">{article.author_name}</span>}
             <span className="flex items-center gap-1"><Clock size={11} /> {timeAgo(article.published_at)}</span>
             <span className="flex items-center gap-1"><Eye size={11} /> {article.views}</span>
           </div>

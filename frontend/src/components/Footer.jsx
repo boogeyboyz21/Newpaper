@@ -55,8 +55,8 @@ export default function Footer() {
             <span className="font-serif-display font-black text-xl">The Editorial Wire</span>
           </Link>
           <ul className="flex flex-wrap items-center gap-4 text-xs text-ink-soft">
-            {["FAQ", "Privacy Policy", "Terms", "Advertise", "Contact Us"].map((l) => (
-              <li key={l} className="hover:text-green cursor-pointer">{l}</li>
+            {[["FAQ", "/page/faq"], ["Privacy Policy", "/page/privacy"], ["Terms", "/page/terms"], ["Advertise", "/advertise"], ["Contact Us", "/contact"]].map(([l, to]) => (
+              <li key={l}><Link to={to} className="hover:text-green">{l}</Link></li>
             ))}
           </ul>
           <div className="flex gap-2">

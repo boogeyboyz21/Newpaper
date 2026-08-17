@@ -6,7 +6,7 @@ import { KeyRound, CloudSun, CreditCard, BarChart3 } from "lucide-react";
 export default function SettingsTab() {
   const [form, setForm] = useState({
     openweather_key: "", razorpay_key_id: "", razorpay_key_secret: "",
-    ga_id: "", analytics_mode: "privacy",
+    ga_id: "", analytics_mode: "privacy", adsense_client: "",
   });
   const [secretSet, setSecretSet] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -19,6 +19,7 @@ export default function SettingsTab() {
         razorpay_key_id: data.razorpay_key_id || "",
         ga_id: data.ga_id || "",
         analytics_mode: data.analytics_mode || "privacy",
+        adsense_client: data.adsense_client || "",
       }));
       setSecretSet(data.razorpay_key_secret_set);
     }).catch(() => {});
@@ -71,7 +72,9 @@ export default function SettingsTab() {
             <option value="ga4">Google Analytics 4 (anonymized IP)</option>
           </select>
           <label className="text-xs text-ink-soft">GA4 Measurement ID</label>
-          <input data-testid="set-ga-id" value={form.ga_id} onChange={upd("ga_id")} placeholder="G-XXXXXXXXXX" className={inputCls} />
+          <input data-testid="set-ga-id" value={form.ga_id} onChange={upd("ga_id")} placeholder="G-XXXXXXXXXX" className={inputCls + " mb-3"} />
+          <label className="text-xs text-ink-soft">Google AdSense Publisher ID (fills empty ad slots)</label>
+          <input data-testid="set-adsense" value={form.adsense_client} onChange={upd("adsense_client")} placeholder="ca-pub-XXXXXXXXXXXXXXXX" className={inputCls} />
         </div>
 
         <button data-testid="save-settings-btn" disabled={busy} className="btn-gold pill px-6 py-3 text-sm uppercase tracking-wider flex items-center gap-2 disabled:opacity-50">

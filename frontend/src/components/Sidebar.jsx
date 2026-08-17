@@ -7,7 +7,39 @@ import { toast } from "sonner";
 import { timeAgo } from "./ArticleCard";
 import { Facebook, Twitter, Instagram, Youtube, Linkedin, Send, ArrowUpRight } from "lucide-react";
 
-export function AdSlot({ variant = "cream", height = "h-56" }) {
+export function AdSlot({ variant = "cream", height = "h-56", size = "300x250" }) {
+  const [ad, setAd] = useState(null);
+  const [adsense, setAdsense] = useState("");
+  useEffect(() => {
+    api.get(`/ads/active?size=${size}`).then(({ data }) => {
+      if (data.ad) setAd(data.ad);
+      else api.get("/settings").then(({ data: s }) => setAdsense(s.adsense_client || "")).catch(() => {});
+    }).catch(() => {});
+  }, [size]);
+  useEffect(() => {
+    if (adsense && !document.getElementById("adsense-js")) {
+      const sc = document.createElement("script");
+      sc.id = "adsense-js"; sc.async = true; sc.crossOrigin = "anonymous";
+      sc.src = `https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsense}`;
+      document.head.appendChild(sc);
+    }
+    if (adsense) { try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch {} }
+  }, [adsense]);
+  if (ad) {
+    return (
+      <a href={ad.target_url} target="_blank" rel="noopener noreferrer" data-testid="ad-slot-live" className={`block card overflow-hidden ${height}`}>
+        <img src={ad.image_url} alt="Advertisement" className="w-full h-full object-cover" />
+      </a>
+    );
+  }
+  if (adsense) {
+    return (
+      <div data-testid="ad-slot-adsense" className={`card overflow-hidden ${height}`}>
+        <ins className="adsbygoogle" style={{ display: "block", width: "100%", height: "100%" }}
+          data-ad-client={adsense} data-ad-format="auto" data-full-width-responsive="true" />
+      </div>
+    );
+  }
   return (
     <div data-testid="ad-slot" className={`ad-box ${variant === "blue" ? "ad-box-blue" : ""} ${height}`}>
       <span className="text-[10px] uppercase tracking-widest">Advertisement</span>

@@ -20,6 +20,7 @@ class SettingsInput(BaseModel):
     razorpay_key_secret: Optional[str] = None
     ga_id: Optional[str] = None
     analytics_mode: Optional[str] = None
+    adsense_client: Optional[str] = None
 
 
 @router.get("/settings")
@@ -32,6 +33,7 @@ async def get_admin_settings(user=Depends(require_role("administrator"))):
         "razorpay_key_secret_set": bool(s.get("razorpay_key_secret")),
         "ga_id": s.get("ga_id", ""),
         "analytics_mode": s.get("analytics_mode", "privacy"),
+        "adsense_client": s.get("adsense_client", ""),
     }
 
 

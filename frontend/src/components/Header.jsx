@@ -12,7 +12,13 @@ const CATEGORIES = [
   { slug: "sports", label: "Sports" },
 ];
 const STAFF = ["reporter", "editor", "administrator"];
-const TOP_LINKS = ["FAQ", "Privacy Policy", "Terms", "Advertise", "Contact Us"];
+const TOP_LINKS = [
+  { label: "FAQ", to: "/page/faq" },
+  { label: "Privacy Policy", to: "/page/privacy" },
+  { label: "Terms", to: "/page/terms" },
+  { label: "Advertise", to: "/advertise" },
+  { label: "Contact Us", to: "/contact" },
+];
 
 export default function Header() {
   const { dark, toggle } = useTheme();
@@ -46,7 +52,7 @@ export default function Header() {
       <div className={`bg-gold-gradient ${scrolled ? "hidden" : ""}`} style={{ color: "var(--gold-ink)", borderBottom: "2px solid var(--green-dark)" }}>
         <div className="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between text-[11px]">
           <ul className="hidden sm:flex items-center gap-4">
-            {TOP_LINKS.map((l) => <li key={l} className="hover:opacity-80 cursor-pointer">{l}</li>)}
+            {TOP_LINKS.map((l) => <li key={l.label}><Link to={l.to} className="hover:opacity-80">{l.label}</Link></li>)}
           </ul>
           <div className="flex items-center gap-3">
             <span data-testid="header-date">{today}</span>

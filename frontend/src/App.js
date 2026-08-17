@@ -15,6 +15,10 @@ import Plans from "@/pages/Plans";
 import Account from "@/pages/Account";
 import Admin from "@/pages/Admin";
 import Forbidden from "@/pages/Forbidden";
+import Page from "@/pages/Page";
+import Contact from "@/pages/Contact";
+import Advertise from "@/pages/Advertise";
+import Author from "@/pages/Author";
 
 const STAFF = ["reporter", "editor", "administrator"];
 
@@ -30,6 +34,10 @@ function App() {
             <Route path="/category/:slug" element={<Category />} />
             <Route path="/news/:id" element={<Article />} />
             <Route path="/search" element={<Search />} />
+            <Route path="/page/:slug" element={<Page />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/advertise" element={<Advertise />} />
+            <Route path="/author/:id" element={<Author />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/plans" element={<Plans />} />

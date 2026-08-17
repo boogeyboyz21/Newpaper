@@ -15,6 +15,7 @@ from weather_routes import router as weather_router  # noqa: E402
 from payments_routes import router as payments_router  # noqa: E402
 from admin_routes import router as admin_router  # noqa: E402
 from push_routes import router as push_router  # noqa: E402
+from extra_routes import router as extra_router  # noqa: E402
 from seed import seed  # noqa: E402
 
 logging.basicConfig(level=logging.INFO,
@@ -29,6 +30,7 @@ app.include_router(weather_router)
 app.include_router(payments_router)
 app.include_router(admin_router)
 app.include_router(push_router)
+app.include_router(extra_router)
 
 
 @app.get("/api/health")

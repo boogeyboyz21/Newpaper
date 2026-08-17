@@ -6,8 +6,10 @@ import Sidebar from "../components/Sidebar";
 import Comments from "../components/Comments";
 import Paywall from "../components/Paywall";
 import ArticleCard, { timeAgo } from "../components/ArticleCard";
+import ShareBar from "../components/ShareBar";
 import { useAuth } from "../context/AuthContext";
-import { Clock, User, Eye, Lock } from "lucide-react";
+import { Clock, User, Eye, Lock, Bookmark } from "lucide-react";
+import { toast } from "sonner";
 
 function BodyHtml({ body, className }) {
   if (Array.isArray(body)) {
@@ -25,6 +27,7 @@ export default function Article() {
   const { user, isSubscribed } = useAuth();
   const [article, setArticle] = useState(null);
   const [related, setRelated] = useState([]);
+  const [bookmarked, setBookmarked] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -33,8 +36,18 @@ export default function Article() {
       api.get(`/articles?category=${data.category}&limit=4`).then((r) =>
         setRelated(r.data.filter((a) => a.id !== data.id).slice(0, 3))
       );
+      if (user) api.get("/bookmarks/ids").then((r) => setBookmarked(r.data.includes(data.id))).catch(() => {});
     }).catch(() => {});
   }, [id, user]);
+
+  const toggleBookmark = async () => {
+    if (!user) { toast.error("Log in to bookmark articles"); return; }
+    try {
+      const { data } = await api.post(`/bookmarks/${article.id}`);
+      setBookmarked(data.bookmarked);
+      toast.success(data.bookmarked ? "Saved to bookmarks" : "Removed bookmark");
+    } catch { toast.error("Action failed"); }
+  };
 
   if (!article) return <Layout><div className="py-20 text-center text-ink-soft">Loading…</div></Layout>;
 
@@ -52,10 +65,17 @@ export default function Article() {
           </div>
           <h1 className="font-serif-display font-black text-3xl sm:text-5xl leading-tight mt-3">{article.title}</h1>
           {article.subtitle && <p className="font-serif-display italic text-xl text-ink-soft mt-3">{article.subtitle}</p>}
-          <div className="flex items-center gap-4 mt-4 pb-4 border-b border-[var(--line)] text-sm text-ink-soft">
-            <span className="flex items-center gap-1"><User size={14} /> {article.author_name}</span>
+          <div className="flex items-center gap-4 mt-4 text-sm text-ink-soft">
+            <Link to={`/author/${article.author_id}`} className="flex items-center gap-1 hover:text-green" data-testid="article-author-link"><User size={14} /> {article.author_name}</Link>
             <span className="flex items-center gap-1"><Clock size={14} /> {timeAgo(article.published_at)}</span>
             <span className="flex items-center gap-1"><Eye size={14} /> {article.views}</span>
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-3 mt-3 pb-4 border-b border-[var(--line)]">
+            <ShareBar url={typeof window !== "undefined" ? window.location.href : ""} title={article.title} />
+            <button data-testid="bookmark-btn" onClick={toggleBookmark}
+              className={`flex items-center gap-2 pill px-4 py-1.5 text-xs font-bold uppercase tracking-wider border ${bookmarked ? "bg-green text-white border-green" : "card-2"}`}>
+              <Bookmark size={14} fill={bookmarked ? "currentColor" : "none"} /> {bookmarked ? "Saved" : "Bookmark"}
+            </button>
           </div>
 
           <div className="img-zoom my-6 rounded-2xl overflow-hidden border border-[var(--line)]">

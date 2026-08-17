@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { api, API } from "../lib/api";
 import { useAuth } from "../context/AuthContext";
 import Layout from "../components/Layout";
+import AdsManager from "../components/AdsManager";
+import Bookmarks from "../components/Bookmarks";
 import { Download, CreditCard, XCircle, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -167,6 +169,8 @@ export default function Account() {
             </div>
           </div>
         </div>
+        <div className="mt-8"><Bookmarks /></div>
+        <div className="mt-8"><AdsManager /></div>
       </div>
     </Layout>
   );

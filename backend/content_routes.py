@@ -38,6 +38,7 @@ async def get_settings():
         "site_name": "The Editorial Wire",
         "analytics_mode": mode,
         "ga_id": ga if mode == "ga4" else "",
+        "adsense_client": s.get("adsense_client", ""),
     }
 
 
@@ -61,12 +62,14 @@ async def most_read():
 
 @router.get("/articles")
 async def list_articles(category: Optional[str] = None, search: Optional[str] = None,
-                        lead: Optional[bool] = None, limit: int = 30):
+                        lead: Optional[bool] = None, premium: Optional[bool] = None, limit: int = 30):
     q = {"status": "published"}
     if category:
         q["category"] = category
     if lead is not None:
         q["is_lead"] = lead
+    if premium is not None:
+        q["is_premium"] = premium
     if search:
         q["$or"] = [{"title": {"$regex": search, "$options": "i"}},
                     {"excerpt": {"$regex": search, "$options": "i"}}]
@@ -181,6 +184,28 @@ async def upvote(comment_id: str):
     saved = serialize(doc)
     await manager.broadcast(doc["article_id"], {"type": "upvote", "comment_id": comment_id, "upvotes": saved["upvotes"]})
     return {"upvotes": saved["upvotes"]}
+
+
+ALLOWED_REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🔥"]
+
+
+class ReactInput(BaseModel):
+    emoji: str
+
+
+@router.post("/comments/{comment_id}/react")
+async def react_comment(comment_id: str, data: ReactInput):
+    if not ObjectId.is_valid(comment_id):
+        raise HTTPException(404, "Not found")
+    if data.emoji not in ALLOWED_REACTIONS:
+        raise HTTPException(400, "Unsupported reaction")
+    doc = await db.comments.find_one_and_update(
+        {"_id": ObjectId(comment_id)}, {"$inc": {f"reactions.{data.emoji}": 1}}, return_document=True)
+    if not doc:
+        raise HTTPException(404, "Comment not found")
+    saved = serialize(doc)
+    await manager.broadcast(doc["article_id"], {"type": "react", "comment_id": comment_id, "reactions": saved.get("reactions", {})})
+    return {"reactions": saved.get("reactions", {})}
 
 
 @router.websocket("/ws/comments/{article_id}")

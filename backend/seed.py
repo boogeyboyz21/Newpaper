@@ -115,6 +115,23 @@ async def seed():
         await db.settings.update_one({"key": "migrated_free_v1"},
                                      {"$set": {"key": "migrated_free_v1"}}, upsert=True)
 
+    # ---- Default CMS pages & ad plans ----
+    default_pages = {
+        "faq": ("Frequently Asked Questions", "<h2>How much does a subscription cost?</h2><p>Monthly is Rs 199 and annual is Rs 1499 (incl. 18% GST). Most articles are free to read.</p><h2>Can I cancel anytime?</h2><p>Yes. You keep access until the end of your billing period.</p><h2>Do you offer GST invoices?</h2><p>Yes, add your company name and GSTIN at checkout for a compliant tax invoice.</p>"),
+        "privacy": ("Privacy Policy", "<p>The Editorial Wire respects your privacy. We collect only the data needed to provide our service and never sell your personal information. We use privacy-first analytics by default.</p><h2>Cookies</h2><p>We use minimal cookies for authentication and preferences.</p>"),
+        "terms": ("Terms of Service", "<p>By using The Editorial Wire you agree to these terms. Content is provided for personal, non-commercial use. Subscriptions renew automatically unless cancelled.</p><h2>Advertising</h2><p>Advertisers are responsible for the content of their banners, which are subject to editorial approval.</p>"),
+    }
+    for slug, (title, body) in default_pages.items():
+        if not await db.pages.find_one({"slug": slug}):
+            await db.pages.insert_one({"slug": slug, "title": title, "body": body})
+
+    if await db.ad_plans.count_documents({}) == 0:
+        for p in [
+            {"label": "Sidebar Rectangle", "size": "300x250", "price": 4999, "impressions": 50000},
+            {"label": "Leaderboard Banner", "size": "728x90", "price": 7999, "impressions": 100000},
+        ]:
+            await db.ad_plans.insert_one({**p, "active": True, "created_at": datetime.now(timezone.utc).isoformat()})
+
     # ---- Credentials file ----
     creds = f"""# Test Credentials
 
