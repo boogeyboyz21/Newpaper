@@ -43,7 +43,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50" style={{ backgroundColor: "var(--paper)" }}>
       {/* utility bar */}
-      <div className={`${scrolled ? "hidden" : ""}`} style={{ backgroundColor: "var(--gold-deep)", color: "var(--gold-ink)", borderBottom: "2px solid var(--green-dark)" }}>
+      <div className={`bg-gold-gradient ${scrolled ? "hidden" : ""}`} style={{ color: "var(--gold-ink)", borderBottom: "2px solid var(--green-dark)" }}>
         <div className="max-w-7xl mx-auto px-4 h-9 flex items-center justify-between text-[11px]">
           <ul className="hidden sm:flex items-center gap-4">
             {TOP_LINKS.map((l) => <li key={l} className="hover:opacity-80 cursor-pointer">{l}</li>)}

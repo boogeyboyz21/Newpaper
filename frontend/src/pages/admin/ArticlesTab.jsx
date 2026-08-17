@@ -3,11 +3,12 @@ import { api } from "../../lib/api";
 import { useAuth } from "../../context/AuthContext";
 import { Plus, Edit, Trash2, Send, Upload, X } from "lucide-react";
 import { toast } from "sonner";
+import RichTextEditor from "../../components/RichTextEditor";
 
 const CATS = ["global", "business", "tech", "lifestyle", "sports"];
 const EMPTY = {
-  title: "", subtitle: "", category: "global", excerpt: "", bodyText: "",
-  image_url: "", tags: "", is_lead: false, is_breaking: false, is_premium: true,
+  title: "", subtitle: "", category: "global", excerpt: "", bodyHtml: "",
+  image_url: "", tags: "", is_lead: false, is_breaking: false, is_premium: false,
 };
 
 const STATUS_STYLE = {
@@ -28,13 +29,15 @@ export default function ArticlesTab() {
   const openNew = () => setEditing({ ...EMPTY });
   const openEdit = (a) =>
     setEditing({
-      ...a, bodyText: (a.body || []).join("\n\n"), tags: (a.tags || []).join(", "),
+      ...a,
+      bodyHtml: Array.isArray(a.body) ? a.body.map((p) => `<p>${p}</p>`).join("") : (a.body || ""),
+      tags: (a.tags || []).join(", "),
     });
 
   const save = async () => {
     const payload = {
       title: editing.title, subtitle: editing.subtitle, category: editing.category,
-      excerpt: editing.excerpt, body: editing.bodyText.split(/\n\s*\n/).map((s) => s.trim()).filter(Boolean),
+      excerpt: editing.excerpt, body: editing.bodyHtml,
       image_url: editing.image_url, tags: editing.tags.split(",").map((t) => t.trim()).filter(Boolean),
       is_lead: editing.is_lead, is_breaking: editing.is_breaking, is_premium: editing.is_premium,
     };
@@ -143,13 +146,12 @@ export default function ArticlesTab() {
               <textarea placeholder="Excerpt / summary" rows={2} value={editing.excerpt}
                 onChange={(e) => setEditing({ ...editing, excerpt: e.target.value })}
                 className="w-full border border-[var(--line)] px-3 py-2 bg-transparent outline-none text-ink" />
-              <textarea data-testid="editor-body" placeholder="Body (separate paragraphs with a blank line)" rows={8} value={editing.bodyText}
-                onChange={(e) => setEditing({ ...editing, bodyText: e.target.value })}
-                className="w-full border border-[var(--line)] px-3 py-2 bg-transparent outline-none text-ink" />
+              <label className="text-xs text-ink-soft">Article body (rich text + inline images)</label>
+              <RichTextEditor value={editing.bodyHtml} onChange={(html) => setEditing({ ...editing, bodyHtml: html })} />
               <div className="flex flex-wrap gap-4 text-sm">
                 <label className="flex items-center gap-2"><input type="checkbox" checked={editing.is_lead} onChange={(e) => setEditing({ ...editing, is_lead: e.target.checked })} /> Lead story</label>
                 <label className="flex items-center gap-2"><input type="checkbox" checked={editing.is_breaking} onChange={(e) => setEditing({ ...editing, is_breaking: e.target.checked })} /> Breaking</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={editing.is_premium} onChange={(e) => setEditing({ ...editing, is_premium: e.target.checked })} /> Premium</label>
+                <label className="flex items-center gap-2" data-testid="premium-checkbox"><input type="checkbox" checked={editing.is_premium} onChange={(e) => setEditing({ ...editing, is_premium: e.target.checked })} /> Subscribers only (premium)</label>
               </div>
               <button data-testid="save-article-btn" onClick={save}
                 className="w-full bg-crimson text-white py-3 font-bold uppercase tracking-wider text-sm">

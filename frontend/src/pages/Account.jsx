@@ -92,8 +92,11 @@ export default function Account() {
                       <p className="font-semibold" data-testid="next-billing">{istDate(sub.next_billing)}</p>
                     </div>
                     <p className="text-xs text-ink-soft mt-3 flex items-center gap-1">
-                      <CreditCard size={12} /> Processed via Razorpay
+                      <CreditCard size={12} /> {sub.payment_method || "Razorpay"}
                     </p>
+                    {sub.auto_renew && sub.status === "active" && (
+                      <p className="text-xs text-green mt-1" data-testid="auto-renew-note">Auto-renews on next billing date</p>
+                    )}
                     {sub.cancel_at_period_end && (
                       <p className="text-xs text-amber-600 mt-2">Ends after current period (grace access retained).</p>
                     )}

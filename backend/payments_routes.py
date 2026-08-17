@@ -113,7 +113,8 @@ async def _activate(user_id, order):
         "status": "active", "plan_id": order["plan_id"], "plan_label": plan["label"],
         "started_at": datetime.now(timezone.utc).isoformat(),
         "next_billing": next_billing.isoformat(), "amount": plan["amount"],
-        "cancel_at_period_end": False,
+        "cancel_at_period_end": False, "auto_renew": True,
+        "payment_method": "Razorpay UPI Autopay / Card mandate",
     }
     await db.users.update_one({"_id": ObjectId(user_id)}, {"$set": {"subscription": sub, "role_paid": True}})
     return sub
@@ -133,8 +134,12 @@ async def _create_invoice(user, order):
     }
     res = await db.invoices.insert_one(inv)
     inv_id = str(res.inserted_id)
-    # MOCKED email delivery of PDF invoice
-    logger.info(f"[MOCKED EMAIL] Invoice {inv['invoice_no']} PDF emailed to {user['email']} within 5 minutes.")
+    # Deliver GST invoice by email (Resend managed). Best-effort, non-blocking failure.
+    try:
+        from email_utils import send_invoice_email
+        await send_invoice_email(user["email"], user["name"], inv)
+    except Exception as e:
+        logger.warning(f"invoice email failed: {e}")
     return inv_id
 
 

@@ -1,7 +1,9 @@
 import re
 from datetime import datetime, timezone
-from typing import Optional, List
-from fastapi import APIRouter, HTTPException, Request, Depends, WebSocket, WebSocketDisconnect
+import base64
+from typing import Optional, List, Union
+from fastapi import APIRouter, HTTPException, Request, Depends, WebSocket, WebSocketDisconnect, UploadFile, File
+from fastapi.responses import Response
 from pydantic import BaseModel
 from bson import ObjectId
 from database import db, serialize
@@ -204,19 +206,41 @@ async def newsletter(data: NewsletterInput):
     return {"ok": True, "message": "Subscribed to newsletter"}
 
 
+# ---------------- Media upload (staff) ----------------
+@router.post("/staff/media")
+async def upload_media(file: UploadFile = File(...),
+                       user=Depends(require_role("reporter", "editor", "administrator"))):
+    content = await file.read()
+    b64 = base64.b64encode(content).decode()
+    res = await db.media.insert_one({"data": b64, "content_type": file.content_type or "image/png",
+                                     "by": user["id"], "created_at": now_iso()})
+    return {"url": f"/api/media/{res.inserted_id}"}
+
+
+@router.get("/media/{media_id}")
+async def get_media(media_id: str):
+    if not ObjectId.is_valid(media_id):
+        raise HTTPException(404, "Not found")
+    doc = await db.media.find_one({"_id": ObjectId(media_id)})
+    if not doc:
+        raise HTTPException(404, "Media not found")
+    return Response(content=base64.b64decode(doc["data"]),
+                    media_type=doc.get("content_type", "image/png"))
+
+
 # ---------------- Staff article management (RBAC) ----------------
 class ArticleInput(BaseModel):
     title: str
     subtitle: Optional[str] = ""
     category: str
     excerpt: str
-    body: List[str]
+    body: Union[str, List[str]]
     image_url: str
     author_name: Optional[str] = None
     tags: List[str] = []
     is_lead: bool = False
     is_breaking: bool = False
-    is_premium: bool = True
+    is_premium: bool = False
 
 
 @router.get("/staff/articles")

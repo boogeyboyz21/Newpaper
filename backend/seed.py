@@ -106,6 +106,15 @@ async def seed():
     await db.articles.create_index([("category", 1), ("status", 1)])
     await db.comments.create_index([("article_id", 1), ("status", 1)])
 
+    # ---- One-time: make site free by default, mark two articles premium (demo) ----
+    if not await db.settings.find_one({"key": "migrated_free_v1"}):
+        await db.articles.update_many({}, {"$set": {"is_premium": False}})
+        prem = await db.articles.find({}).sort("views", -1).to_list(2)
+        for a in prem:
+            await db.articles.update_one({"_id": a["_id"]}, {"$set": {"is_premium": True}})
+        await db.settings.update_one({"key": "migrated_free_v1"},
+                                     {"$set": {"key": "migrated_free_v1"}}, upsert=True)
+
     # ---- Credentials file ----
     creds = f"""# Test Credentials
 

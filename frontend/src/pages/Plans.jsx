@@ -136,7 +136,7 @@ export default function Plans() {
               placeholder="State" className="border border-[var(--line)] px-3 py-2 text-sm bg-transparent outline-none text-ink" />
           </div>
           <p className="text-xs text-ink-soft mt-2">
-            West Bengal → 9% CGST + 9% SGST · Other states → 18% IGST · SAC 998431
+            West Bengal → 9% CGST + 9% SGST · Other states → 18% IGST · SAC 998431. Plans auto-renew via UPI Autopay / card mandate; cancel anytime.
           </p>
         </div>
       </div>
