@@ -1,0 +1,117 @@
+{
+  "theme": "hybrid_fullstack",
+  "typography": {
+    "heading_font": "Playfair Display",
+    "body_font": "Inter",
+    "fallback_heading": "Georgia, serif",
+    "fallback_body": "Roboto, sans-serif",
+    "strategy": "Classic broadsheet headlines paired with clean sans-serif body text. Generous line height on body. Tight tracking on large headings.",
+    "sizes": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tight leading-none",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight",
+      "h3": "text-xl sm:text-2xl",
+      "body": "text-base leading-relaxed"
+    }
+  },
+  "colors": {
+    "light_mode": {
+      "background": "#FDFBF7",
+      "surface": "#FFFFFF",
+      "text_primary": "#1A1A1A",
+      "text_secondary": "#4A4A4A",
+      "accent_primary": "#0A192F",
+      "accent_secondary": "#8B0000",
+      "border": "#E5E5E5",
+      "alert_banner": "#D32F2F"
+    },
+    "dark_mode": {
+      "background": "#121212",
+      "surface": "#1E1E1E",
+      "text_primary": "#E0E0E0",
+      "text_secondary": "#A0A0A0",
+      "accent_primary": "#64B5F6",
+      "accent_secondary": "#EF5350",
+      "border": "#333333",
+      "alert_banner": "#B71C1C"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": "Minimalistic. Use sharp 1px borders rather than soft shadows to replicate the printed broadsheet feel.",
+    "borders": "Heavy use of horizontal rules (1px and 2px borders) to separate articles and sections, mimicking newspaper columns.",
+    "textures": "Subtle paper grain noise on the off-white background to enhance the broadsheet aesthetic.",
+    "corners": "Sharp corners (rounded-none or max rounded-sm). Newspapers are rectangular and structured."
+  },
+  "layouts": {
+    "grid_system": "Multi-column layout mimicking broadsheet. Use responsive Tailwind grid (12 columns). Generous spacing.",
+    "home_page": {
+      "masthead": "Centered, large Playfair Display font, dynamic date underneath, separating double border lines.",
+      "breaking_ticker": "Horizontal scrolling text just below the masthead.",
+      "hero_section": "Lead global story spans 8 columns. 2x2 grid of thumbnails spans 4 columns.",
+      "main_content": "Left thumbnail, right content layout for feed. 8 columns.",
+      "sidebar": "Sticky right sidebar. 4 columns. Contains search, tabs, ads, newsletter, weather."
+    }
+  },
+  "component_guidelines": {
+    "buttons": "Sharp edges, solid accent colors, hover states that increase contrast.",
+    "cards": "Cardless design. Use pure grid layouts with solid border dividers.",
+    "tags": "Small, uppercase, tracking-widest, bold text in primary accent color (Deep Navy/Dark Crimson).",
+    "nav_bar": "Sticky, solid background (or glassmorphism but strictly non-transparent) to ensure readability. Contains Dark Mode toggle."
+  },
+  "motion": {
+    "hover_states": "Underline animations on article titles. Image slight scale on hover.",
+    "transitions": "Fast, crisp transitions (150ms).",
+    "breaking_ticker": "Continuous smooth marquee animation (react-fast-marquee)."
+  },
+  "accessibility": {
+    "contrast": "APCA/WCAG AA compliant. High contrast between text and background.",
+    "data_testid": "Mandatory on all interactive elements (buttons, links, form inputs).",
+    "focus": "Clear focus rings (2px solid primary accent) for keyboard navigation."
+  },
+  "image_urls": [
+    {
+      "category": "Global Politics Lead",
+      "url": "https://images.unsplash.com/photo-1758138258458-64ee0fbdef4c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1Mjh8MHwxfHNlYXJjaHwzfHxnbG9iYWwlMjBwb2xpdGljc3xlbnwwfHx8fDE3ODY5NjgwODN8MA&ixlib=rb-4.1.0&q=85",
+      "description": "EU and US flags"
+    },
+    {
+      "category": "Business Markets",
+      "url": "https://images.unsplash.com/photo-1686100511314-7d4a52987f2f?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHwzfHxidXNpbmVzcyUyMGNvcnBvcmF0ZSUyMG9mZmljZXxlbnwwfHx8fDE3ODY5NjgwODN8MA&ixlib=rb-4.1.0&q=85",
+      "description": "Corporate office table"
+    },
+    {
+      "category": "Science Technology",
+      "url": "https://images.pexels.com/photos/18471461/pexels-photo-18471461.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "High-tech laboratory"
+    },
+    {
+      "category": "Lifestyle Travel",
+      "url": "https://images.pexels.com/photos/4901939/pexels-photo-4901939.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Women enjoying food outdoors"
+    },
+    {
+      "category": "Sports Action",
+      "url": "https://images.pexels.com/photos/29666576/pexels-photo-29666576.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Football action"
+    }
+  ],
+  "instructions_to_main_agent": {
+    "general": [
+      "No cryptocurrency, stock tickers, or tokens allowed.",
+      "Use Playfair Display for all headlines and Inter for all body text.",
+      "Use Phosphor Icons or lucide-react for clean, classic iconography.",
+      "Implement persistent dark mode toggle in the sticky header.",
+      "Ensure the Emergency alert banner is distinct (crimson/amber) and placed above the masthead.",
+      "Build a metered paywall with blur overlay and subscription modal.",
+      "For the admin dashboard, create an RBAC system (Administrator/Editor/Reporter), comments moderation, push notification console, audit logs, GST invoicing."
+    ],
+    "universal_guidelines": [
+      "You MUST NOT apply universal transition (e.g., transition: all).",
+      "You MUST NOT center align the app container (.App { text-align: center; }).",
+      "Always use data-testid for all interactive and key informational elements.",
+      "Do NOT use complete transparent backgrounds in headers, overlays, or any surface that has content under it.",
+      "Use sonner for toast notifications.",
+      "Prioritize existing shadcn/ui components before creating new ones.",
+      "Create depth through layered design elements with z-index hierarchy, while keeping card borders strict as per the broadsheet look."
+    ]
+  }
+}
