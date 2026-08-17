@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { api } from "../../lib/api";
-import { UserPlus, Trash2 } from "lucide-react";
+import { UserPlus, Trash2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 
 const ROLES = ["reporter", "editor", "administrator", "subscriber"];
@@ -23,6 +23,12 @@ export default function StaffTab() {
   const del = async (id) => {
     if (!window.confirm("Delete user?")) return;
     try { await api.delete(`/admin/users/${id}`); toast.success("Deleted"); load(); }
+    catch (e) { toast.error(e.response?.data?.detail || "Failed"); }
+  };
+  const setPassword = async (id, name) => {
+    const pw = window.prompt(`Set a new password for ${name} (min 6 chars):`);
+    if (!pw) return;
+    try { await api.patch(`/admin/users/${id}/password`, { password: pw }); toast.success("Password updated"); }
     catch (e) { toast.error(e.response?.data?.detail || "Failed"); }
   };
 
@@ -59,7 +65,10 @@ export default function StaffTab() {
                   </select>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <button data-testid="delete-staff-btn" onClick={() => del(u.id)} className="text-crimson"><Trash2 size={15} /></button>
+                  <div className="flex items-center justify-end gap-3">
+                    <button data-testid="set-password-btn" title="Set password" onClick={() => setPassword(u.id, u.name)} className="text-green"><KeyRound size={15} /></button>
+                    <button data-testid="delete-staff-btn" onClick={() => del(u.id)} className="text-crimson"><Trash2 size={15} /></button>
+                  </div>
                 </td>
               </tr>
             ))}

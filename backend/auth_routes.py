@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, Response, Depends
 from pydantic import BaseModel, EmailStr
 from datetime import datetime, timezone, timedelta
+from bson import ObjectId
 from database import db, serialize
 from auth_utils import (
     hash_password, verify_password, create_access_token, get_current_user,
@@ -88,3 +89,19 @@ async def logout(response: Response):
 @router.get("/me")
 async def me(user: dict = Depends(get_current_user)):
     return user
+
+
+class ChangePwInput(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.post("/change-password")
+async def change_password(data: ChangePwInput, user: dict = Depends(get_current_user)):
+    u = await db.users.find_one({"_id": ObjectId(user["id"])})
+    if not u or not verify_password(data.current_password, u["password_hash"]):
+        raise HTTPException(status_code=400, detail="Current password is incorrect")
+    if len(data.new_password) < 6:
+        raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
+    await db.users.update_one({"_id": u["_id"]}, {"$set": {"password_hash": hash_password(data.new_password)}})
+    return {"ok": True}

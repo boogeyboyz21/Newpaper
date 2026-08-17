@@ -86,6 +86,19 @@ async def change_role(uid: str, data: RoleInput, request: Request, user=Depends(
     return {"ok": True}
 
 
+class PwSetInput(BaseModel):
+    password: str
+
+
+@router.patch("/users/{uid}/password")
+async def set_user_password(uid: str, data: PwSetInput, request: Request, user=Depends(require_role("administrator"))):
+    if len(data.password) < 6:
+        raise HTTPException(400, "Password must be at least 6 characters")
+    await db.users.update_one({"_id": ObjectId(uid)}, {"$set": {"password_hash": hash_password(data.password)}})
+    await log_action(user, "Password Reset", uid, request)
+    return {"ok": True}
+
+
 @router.delete("/users/{uid}")
 async def delete_user(uid: str, request: Request, user=Depends(require_role("administrator"))):
     if uid == user["id"]:
